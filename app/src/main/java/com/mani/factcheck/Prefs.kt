@@ -4,7 +4,7 @@ import android.content.Context
 
 object Prefs {
     private const val FILE = "factcheck"
-    const val DEFAULT_MODEL = "gemini-2.5-flash"
+    const val DEFAULT_MODEL = "gemini-3.8-flash"
 
     fun key(ctx: Context): String =
         ctx.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString("gemini_key", "") ?: ""
