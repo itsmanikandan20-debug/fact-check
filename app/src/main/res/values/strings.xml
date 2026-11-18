@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fact Check</string>
+    <string name="service_label">Fact Check bubble</string>
+    <string name="service_description">Shows a small ✨ bubble. When you tap it, Fact Check reads the text box you are typing in, finds wrong facts and fixes only the wrong word. Text is read only when you tap the bubble.</string>
+</resources>
