@@ -55,7 +55,10 @@ object FactEngine {
     }
 
     /** Asks Google Gemini (with Google Search) to find wrong facts. */
-    fun aiFixes(text: String, apiKey: String, model: String, today: LocalDate = LocalDate.now()): List<Fix> {
+    /** Result of an AI check. usedSearch = false means Gemini answered from old memory only. */
+    data class AiResult(val fixes: List<Fix>, val usedSearch: Boolean)
+
+    fun aiFixes(text: String, apiKey: String, model: String, today: LocalDate = LocalDate.now()): AiResult {
         val prompt = """
             Today's date is $today (${today.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH)}).
             You are a strict fact checker. Find FACTUAL mistakes in the message below:
@@ -74,10 +77,12 @@ object FactEngine {
         """.trimIndent()
 
         return try {
-            parseFixes(callGemini(prompt, apiKey, model, useSearch = true))
+            AiResult(parseFixes(callGemini(prompt, apiKey, model, useSearch = true)), usedSearch = true)
         } catch (e: GeminiException) {
             // Some models or keys don't allow the search tool. Try once without it.
-            if (e.code == 400 || e.code == 429) parseFixes(callGemini(prompt, apiKey, model, useSearch = false)) else throw e
+            if (e.code == 400 || e.code == 429) {
+                AiResult(parseFixes(callGemini(prompt, apiKey, model, useSearch = false)), usedSearch = false)
+            } else throw e
         }
     }
 

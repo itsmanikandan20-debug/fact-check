@@ -134,9 +134,12 @@ class FactAccessibilityService : AccessibilityService() {
             val fixes = mutableListOf<Fix>()
             fixes += FactEngine.localFixes(original)
             var error: String? = null
+            var noSearch = false
             if (apiKey.isNotBlank()) {
                 try {
-                    for (f in FactEngine.aiFixes(original, apiKey, model)) {
+                    val ai = FactEngine.aiFixes(original, apiKey, model)
+                    noSearch = !ai.usedSearch
+                    for (f in ai.fixes) {
                         if (fixes.none { it.wrong.equals(f.wrong, ignoreCase = true) }) fixes += f
                     }
                 } catch (e: Exception) {
@@ -159,7 +162,7 @@ class FactAccessibilityService : AccessibilityService() {
                             val summary = applied.joinToString("\n") { "${it.wrong} → ${it.correct}" }
                             val detail = applied.first().let { f ->
                                 listOf(f.reason, f.source).filter { it.isNotBlank() }.joinToString(" · ")
-                            }
+                            } + if (noSearch) "\n🟡 Checked without Google Search: may be outdated" else ""
                             showCard("✅ $summary", detail) { setText(node, current) }
                         } else {
                             showCard("Couldn't edit this text box", null)
@@ -168,6 +171,10 @@ class FactAccessibilityService : AccessibilityService() {
                     error != null -> showCard("⚠️ Couldn't check: $error", null)
                     apiKey.isBlank() ->
                         showCard("✅ No date mistakes", "Add a Gemini key in the app to check other facts")
+                    noSearch -> showCard(
+                        "🟡 No mistake found, but not 100% sure",
+                        "Checked without Google Search, so recent news (like who is CM now) may be outdated"
+                    )
                     else -> showCard("✅ All facts look correct", null)
                 }
             }
