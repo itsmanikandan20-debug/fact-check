@@ -77,7 +77,7 @@ object FactEngine {
             parseFixes(callGemini(prompt, apiKey, model, useSearch = true))
         } catch (e: GeminiException) {
             // Some models or keys don't allow the search tool. Try once without it.
-            if (e.code == 400) parseFixes(callGemini(prompt, apiKey, model, useSearch = false)) else throw e
+            if (e.code == 400 || e.code == 429) parseFixes(callGemini(prompt, apiKey, model, useSearch = false)) else throw e
         }
     }
 
